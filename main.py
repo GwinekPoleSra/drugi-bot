@@ -4,7 +4,8 @@ import requests
 import pickle
 import os
 from dotenv import load_dotenv
-from flask import Flask, request
+from flask import Flask
+import threading
 
 # Załaduj zmienne środowiskowe z .env
 load_dotenv()
@@ -85,10 +86,16 @@ async def link(ctx, *, url):
     else:
         await ctx.send("❌ Wystąpił problem przy tworzeniu linku.")
 
-# Start bota
+# Uruchomienie bota
 TOKEN = os.getenv("DISCORD_TOKEN") or "WSTAW_TU_TOKEN"
-bot.run(TOKEN)
 
-# Nasłuchuj na porcie dla aplikacji Flask (Render wymaga tego)
-if __name__ == "__main__":
+# Funkcja uruchamiająca Flask w oddzielnym wątku
+def run_flask():
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
+
+# Uruchamianie aplikacji Flask w osobnym wątku
+flask_thread = threading.Thread(target=run_flask)
+flask_thread.start()
+
+# Uruchomienie bota Discord
+bot.run(TOKEN)
