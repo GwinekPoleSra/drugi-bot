@@ -48,6 +48,27 @@ def load_cookies():
         print(f"❌ Błąd podczas ładowania ciasteczek: {e}")
         return {}
 
+# Funkcja zapisywania ciasteczek do pliku
+def save_cookies():
+    session = requests.Session()
+    
+    # Strona, z której chcesz pobrać ciasteczka
+    url = "https://linkvertise.com/"
+    
+    # Wysyłamy żądanie
+    response = session.get(url)
+    
+    # Pobieramy ciasteczka
+    cookies = session.cookies.get_dict()
+    print("Ciasteczka:", cookies)
+    
+    # Zapisujemy ciasteczka do pliku
+    with open("cookies.pkl", "wb") as f:
+        pickle.dump(cookies, f)
+    
+    print("Ciasteczka zostały zapisane do pliku cookies.pkl.")
+    session.close()
+
 # Tworzenie linku
 def create_linkvertise_link(original_url):
     session = requests.Session()
@@ -95,6 +116,12 @@ async def link(ctx, *, url):
         await ctx.send(f"Oto Twój link Linkvertise:\n{generated_link}")
     else:
         await ctx.send("❌ Wystąpił problem przy tworzeniu linku.")
+
+# Komenda !save_cookies
+@bot.command()
+async def save(ctx):
+    save_cookies()  # Zapisujemy ciasteczka
+    await ctx.send("✔️ Ciasteczka zostały zapisane do pliku cookies.pkl.")
 
 # Uruchomienie bota
 TOKEN = os.getenv("DISCORD_TOKEN") or "WSTAW_TU_TOKEN"
