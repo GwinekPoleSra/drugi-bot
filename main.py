@@ -55,19 +55,24 @@ def save_cookies():
     # Strona, z której chcesz pobrać ciasteczka
     url = "https://linkvertise.com/"
     
-    # Wysyłamy żądanie
-    response = session.get(url)
-    
-    # Pobieramy ciasteczka
-    cookies = session.cookies.get_dict()
-    print("Ciasteczka:", cookies)
-    
-    # Zapisujemy ciasteczka do pliku
-    with open("cookies.pkl", "wb") as f:
-        pickle.dump(cookies, f)
-    
-    print("Ciasteczka zostały zapisane do pliku cookies.pkl.")
-    session.close()
+    try:
+        # Wysyłamy żądanie
+        response = session.get(url)
+        response.raise_for_status()  # Sprawdza, czy odpowiedź jest prawidłowa
+
+        # Pobieramy ciasteczka
+        cookies = session.cookies.get_dict()
+        print("Ciasteczka:", cookies)
+        
+        # Zapisujemy ciasteczka do pliku
+        with open("cookies.pkl", "wb") as f:
+            pickle.dump(cookies, f)
+        
+        print("✔️ Ciasteczka zostały zapisane do pliku cookies.pkl.")
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Błąd podczas pobierania ciasteczek: {e}")
+    finally:
+        session.close()
 
 # Tworzenie linku
 def create_linkvertise_link(original_url):
@@ -92,18 +97,25 @@ def create_linkvertise_link(original_url):
         "advertising_type": "article"
     }
     
-    # Wysłanie żądania
-    response = session.post(api_url, json=payload, headers=headers)
+    try:
+        # Wysłanie żądania
+        response = session.post(api_url, json=payload, headers=headers)
+        response.raise_for_status()  # Sprawdza, czy odpowiedź jest prawidłowa
 
-    # Dodajemy logowanie odpowiedzi
-    print(f"🌐 Odpowiedź serwera: {response.status_code} - {response.text}")
+        # Dodajemy logowanie odpowiedzi
+        print(f"🌐 Odpowiedź serwera: {response.status_code} - {response.text}")
 
-    if response.status_code == 201:
-        data = response.json()
-        return data["data"]["fullLink"]
-    else:
-        print(f"❌ Błąd {response.status_code} - {response.text}")
+        if response.status_code == 201:
+            data = response.json()
+            return data["data"]["fullLink"]
+        else:
+            print(f"❌ Błąd {response.status_code} - {response.text}")
+            return None
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Błąd podczas wysyłania żądania: {e}")
         return None
+    finally:
+        session.close()
 
 # Komenda !link
 @bot.command()
