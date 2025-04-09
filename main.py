@@ -42,4 +42,15 @@ async def link(ctx, *, url):
     else:
         await ctx.send("❌ Wystąpił problem przy tworzeniu linku.")
 
+
+
+def load_cookies():
+    with open("cookies.pkl", "rb") as f:
+        cookies = pickle.load(f)
+        try:
+            return {c.name: c.value for c in cookies}  # jeśli to obiekty cookies
+        except:
+            return cookies  # może to już dict
+
+
 bot.run(os.getenv("DISCORD_TOKEN"))
