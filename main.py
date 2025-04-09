@@ -4,12 +4,17 @@ import requests
 import pickle
 import os
 from dotenv import load_dotenv
+from flask import Flask
 
 # Załaduj zmienne środowiskowe z .env
 load_dotenv()
 
 intents = discord.Intents.default()
+intents.message_content = True  # Włączenie uprawnień do treści wiadomości
 bot = commands.Bot(command_prefix="!", intents=intents)
+
+# Inicjalizacja aplikacji Flask
+app = Flask(__name__)
 
 # Ładowanie cookies
 def load_cookies():
@@ -70,6 +75,23 @@ async def link(ctx, *, url):
     else:
         await ctx.send("❌ Wystąpił problem przy tworzeniu linku.")
 
-# Start bota
-TOKEN = os.getenv("DISCORD_TOKEN") or "WSTAW_TU_TOKEN"
-bot.run(TOKEN)
+# Strona do uruchomienia w Flasku (jeśli potrzebujesz)
+@app.route('/')
+def home():
+    return "Aplikacja działa!"
+
+# Start bota i aplikacji webowej
+if __name__ == "__main__":
+    # Pobierz port z zmiennej środowiskowej lub ustaw domyślnie na 5000
+    port = int(os.getenv("PORT", 5000))  # Port z zmiennej środowiskowej lub 5000
+    # Uruchom Flask w tle
+    from threading import Thread
+    def run_flask():
+        app.run(host='0.0.0.0', port=port)
+
+    thread = Thread(target=run_flask)
+    thread.start()
+    
+    # Uruchom bota
+    TOKEN = os.getenv("DISCORD_TOKEN") or "WSTAW_TU_TOKEN"
+    bot.run(TOKEN)
