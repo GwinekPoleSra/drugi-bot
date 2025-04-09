@@ -55,7 +55,7 @@ async def link(ctx, *, url):
     generated_link = create_linkvertise_link(url)
 
     if generated_link:
-        await ctx.send(f"Oto Twój link Linkvertise:
+        await ctx.send(f"Oto Twój link Linkvertise:\n{generated_link}")
 {generated_link}")
     else:
         await ctx.send("❌ Wystąpił problem przy tworzeniu linku.")
