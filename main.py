@@ -41,6 +41,7 @@ def load_cookies():
         if isinstance(cookies, list):
             cookies = {cookie["name"]: cookie["value"] for cookie in cookies}
 
+        print(f"🔑 Ciasteczka załadowane: {cookies}")  # Dodajemy logowanie
         return cookies
 
     except Exception as e:
@@ -69,9 +70,13 @@ def create_linkvertise_link(original_url):
         "creator": "BotLink",
         "advertising_type": "article"
     }
-
-    response = session.post(api_url, json=payload, headers=headers)
     
+    # Wysłanie żądania
+    response = session.post(api_url, json=payload, headers=headers)
+
+    # Dodajemy logowanie odpowiedzi
+    print(f"🌐 Odpowiedź serwera: {response.status_code} - {response.text}")
+
     if response.status_code == 201:
         data = response.json()
         return data["data"]["fullLink"]
