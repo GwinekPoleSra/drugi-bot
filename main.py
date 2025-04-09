@@ -4,10 +4,15 @@ import requests
 import pickle
 import os
 from dotenv import load_dotenv
+from flask import Flask, request
 
 # Załaduj zmienne środowiskowe z .env
 load_dotenv()
 
+# Tworzymy aplikację Flask do nasłuchiwania na odpowiednim porcie
+app = Flask(__name__)
+
+# Tworzymy bota Discorda
 intents = discord.Intents.default()
 intents.message_content = True  # Włączenie uprawnień do treści wiadomości
 bot = commands.Bot(command_prefix="!", intents=intents)
@@ -83,3 +88,7 @@ async def link(ctx, *, url):
 # Start bota
 TOKEN = os.getenv("DISCORD_TOKEN") or "WSTAW_TU_TOKEN"
 bot.run(TOKEN)
+
+# Nasłuchuj na porcie dla aplikacji Flask (Render wymaga tego)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
