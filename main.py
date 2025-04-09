@@ -2,19 +2,25 @@ import discord
 from discord.ext import commands
 import requests
 import pickle
-import os
 
 intents = discord.Intents.default()
-intents.message_content = True  # Dodaj to, jeśli chcesz obsługiwać wiadomości
 bot = commands.Bot(command_prefix="!", intents=intents)
 
+# Załaduj cookies jako słownik
 def load_cookies():
     with open("cookies.pkl", "rb") as f:
-        return pickle.load(f)
+        cookies = pickle.load(f)
+        try:
+            return {cookie.name: cookie.value for cookie in cookies}  # obiekty cookies
+        except Exception as e:
+            print("❗ Błąd parsowania cookies:", e)
+            return cookies  # może już jest dict
 
+# Tworzenie linku
 def create_linkvertise_link(original_url):
     session = requests.Session()
-    session.cookies.update(load_cookies())
+    cookies = load_cookies()
+    session.cookies.update(cookies)
 
     api_url = "https://publisher.linkvertise.com/api/v1/links"
     payload = {
@@ -27,30 +33,24 @@ def create_linkvertise_link(original_url):
     }
 
     response = session.post(api_url, json=payload)
+    
     if response.status_code == 201:
-        return response.json()["data"]["fullLink"]
+        data = response.json()
+        return data["data"]["fullLink"]
     else:
-        print(f"Błąd: {response.status_code} - {response.text}")
+        print(f"❌ Błąd: {response.status_code} - {response.text}")
         return None
 
+# Komenda bota
 @bot.command()
 async def link(ctx, *, url):
     await ctx.send("🔗 Tworzę link...")
+
     generated_link = create_linkvertise_link(url)
+
     if generated_link:
         await ctx.send(f"Oto Twój link Linkvertise:\n{generated_link}")
     else:
         await ctx.send("❌ Wystąpił problem przy tworzeniu linku.")
 
-
-
-def load_cookies():
-    with open("cookies.pkl", "rb") as f:
-        cookies = pickle.load(f)
-        try:
-            return {c.name: c.value for c in cookies}  # jeśli to obiekty cookies
-        except:
-            return cookies  # może to już dict
-
-
-bot.run(os.getenv("DISCORD_TOKEN"))
+bot.run("TWÓJ_TOKEN_BOTA")
