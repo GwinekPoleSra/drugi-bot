@@ -47,4 +47,4 @@ async def link(ctx, *, url):
     else:
         await ctx.send("❌ Wystąpił problem przy tworzeniu linku.")
 
-bot.run("TWÓJ_TOKEN_BOTA")
+bot.run("DISCORD_TOKEN")
