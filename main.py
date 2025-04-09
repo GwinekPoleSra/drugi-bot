@@ -4,7 +4,6 @@ import requests
 import pickle
 import os
 from dotenv import load_dotenv
-from flask import Flask
 
 # Załaduj zmienne środowiskowe z .env
 load_dotenv()
@@ -13,28 +12,34 @@ intents = discord.Intents.default()
 intents.message_content = True  # Włączenie uprawnień do treści wiadomości
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Inicjalizacja aplikacji Flask
-app = Flask(__name__)
-
 # Ładowanie cookies
 def load_cookies():
-    if not os.path.exists("cookies.pkl"):
-        print("❌ Plik cookies.pkl nie istnieje.")
+    cookies_file = "cookies.pkl"
+
+    # Sprawdź, czy plik cookies.pkl istnieje
+    if not os.path.exists(cookies_file):
+        print(f"❌ Plik {cookies_file} nie istnieje!")
         return {}
-    
-    with open("cookies.pkl", "rb") as f:
-        cookies = pickle.load(f)
-        return {cookie["name"]: cookie["value"] for cookie in cookies}
+
+    try:
+        # Otwórz i załaduj dane z cookies.pkl
+        with open(cookies_file, "rb") as f:
+            cookies = pickle.load(f)
+
+        # Jeżeli cookies to lista obiektów, zamień ją na słownik
+        if isinstance(cookies, list):
+            cookies = {cookie["name"]: cookie["value"] for cookie in cookies}
+
+        return cookies
+
+    except Exception as e:
+        print(f"❌ Błąd podczas ładowania ciasteczek: {e}")
+        return {}
 
 # Tworzenie linku
 def create_linkvertise_link(original_url):
     session = requests.Session()
-    cookies = load_cookies()
-    
-    if not cookies:
-        print("❌ Brak ciasteczek do załadowania.")
-        return None
-    
+    cookies = load_cookies()  # Użycie funkcji load_cookies() tutaj
     session.cookies.update(cookies)
 
     headers = {
@@ -75,23 +80,6 @@ async def link(ctx, *, url):
     else:
         await ctx.send("❌ Wystąpił problem przy tworzeniu linku.")
 
-# Strona do uruchomienia w Flasku (jeśli potrzebujesz)
-@app.route('/')
-def home():
-    return "Aplikacja działa!"
-
-# Start bota i aplikacji webowej
-if __name__ == "__main__":
-    # Pobierz port z zmiennej środowiskowej lub ustaw domyślnie na 5000
-    port = int(os.getenv("PORT", 5000))  # Port z zmiennej środowiskowej lub 5000
-    # Uruchom Flask w tle
-    from threading import Thread
-    def run_flask():
-        app.run(host='0.0.0.0', port=port)
-
-    thread = Thread(target=run_flask)
-    thread.start()
-    
-    # Uruchom bota
-    TOKEN = os.getenv("DISCORD_TOKEN") or "WSTAW_TU_TOKEN"
-    bot.run(TOKEN)
+# Start bota
+TOKEN = os.getenv("DISCORD_TOKEN") or "WSTAW_TU_TOKEN"
+bot.run(TOKEN)
