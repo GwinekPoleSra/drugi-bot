@@ -13,6 +13,11 @@ load_dotenv()
 # Tworzymy aplikację Flask do nasłuchiwania na odpowiednim porcie
 app = Flask(__name__)
 
+# Dodajemy prostą trasę w Flask, aby uniknąć 404
+@app.route("/")
+def home():
+    return "Flask działa poprawnie!"
+
 # Tworzymy bota Discorda
 intents = discord.Intents.default()
 intents.message_content = True  # Włączenie uprawnień do treści wiadomości
